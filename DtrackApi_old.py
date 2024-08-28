@@ -11,18 +11,20 @@ from Models.Vulnerability import Vulnerability
 def upload_sbom(sbom_path: str, project_name: str, api_url: str, api_key: str) -> str:
     headers = {
         'X-Api-Key': api_key,
-        'Content-Type': 'application/json'
     }
 
-    with open(sbom_path, 'r') as file:
-        sbom_data = file.read()
-
-    payload = {
+    data = {
+        "autoCreate": 'true',
         "projectName": project_name,
-        "bom": sbom_data
+        "projectVersion": '0.1.0',
+        "classifier": 'Library'
     }
 
-    response = requests.put(f'{api_url}/api/v1/bom', headers=headers, json=payload)
+    files = {
+        'bom': open(sbom_path, 'rb')
+    }
+
+    response = requests.put(f'{api_url}/api/v1/bom', headers=headers, data=data, files=files, proxies=proxies, verify=cert_file)
 
     if response.status_code == 200:
         print("SBOM uploaded successfully.")
@@ -106,6 +108,11 @@ if __name__ == "__main__":
     PROJECT_NAME = "Your Project Name"
     API_URL = Configuration.dtrack_api_url
     API_KEY = Configuration.dtrack_api_key
+    cert_file = ""
+    proxies = {
+        "http": "",
+        "https": ""
+    }
 
     try:
         # Retrieve the project by name

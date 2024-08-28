@@ -6,6 +6,7 @@ from Models.Project import Project
 
 # Function to upload SBOM.json to Dependency-Track with a specific project name
 def upload_sbom(sbom_path: str, project_name: str, base_api_url: str, api_key: str) -> str:
+
     data = {
         "autoCreate": 'true',
         "projectName": project_name,
@@ -19,7 +20,7 @@ def upload_sbom(sbom_path: str, project_name: str, base_api_url: str, api_key: s
 
     api_url = f"{base_api_url}/bom"
 
-    response = requests.put(api_url, headers=headers, data=data, files=files, proxies=proxies, verify=cert_file)
+    response = requests.post(api_url, headers=headers, data=data, files=files, proxies=proxies, verify=cert_file)
 
     if response.status_code == 200:
         print("SBOM uploaded successfully.")
@@ -29,6 +30,7 @@ def upload_sbom(sbom_path: str, project_name: str, base_api_url: str, api_key: s
 
 
 def get_project(project_name: str, project_version: str, base_api_url: str, api_key: str) -> Optional[dict]:
+
     params = {
         'name': project_name,
         'version': project_version
@@ -46,9 +48,10 @@ def get_project(project_name: str, project_version: str, base_api_url: str, api_
 
 
 def get_project_vulnerabilities(base_api_url: str, api_key: str) -> Optional[dict]:
+
     project_uuid = project_repository.get_project().get('uuid')
     api_url = f"{base_api_url}/vulnerability/project/{project_uuid}"
-    response = requests.put(api_url, headers=headers, proxies=proxies, verify=cert_file)
+    response = requests.get(api_url, headers=headers, proxies=proxies, verify=cert_file)
 
     if response.status_code == 200:
         print("Project vulnerabilities retrieved successfully.")
@@ -60,9 +63,10 @@ def get_project_vulnerabilities(base_api_url: str, api_key: str) -> Optional[dic
 
 
 def get_project_components(base_api_url: str, api_key: str) -> Optional[dict]:
+
     project_uuid = project_repository.get_project().get('uuid')
     api_url = f"{base_api_url}/component/project/{project_uuid}"
-    response = requests.put(api_url, headers=headers, proxies=proxies, verify=cert_file)
+    response = requests.get(api_url, headers=headers, proxies=proxies, verify=cert_file)
 
     # Check response
     if response.status_code == 200:
@@ -75,9 +79,10 @@ def get_project_components(base_api_url: str, api_key: str) -> Optional[dict]:
 
 
 def get_project_direct_components(base_api_url: str, api_key: str) -> Optional[dict]:
+
     project_uuid = project_repository.get_project().get('uuid')
     api_url = f"{base_api_url}/dependencyGraph/project/{project_uuid}/directDependencies"
-    response = requests.put(api_url, headers=headers, proxies=proxies, verify=cert_file)
+    response = requests.get(api_url, headers=headers, proxies=proxies, verify=cert_file)
 
     # Check response
     if response.status_code == 200:
@@ -96,9 +101,9 @@ if __name__ == '__main__':
     PROJECT_VERSION = '0.1.0'
     BASE_API_URL = Configuration.dtrack_api_url
     API_KEY = Configuration.dtrack_api_key
-    cert_file = ""
+    cert_file = "./Combined_pem.pem"
     headers = {
-        'X-Api-Key': API_KEY,
+        'X-Api-Key': API_KEY
     }
     proxies = {
         "http": "",
@@ -107,6 +112,7 @@ if __name__ == '__main__':
 
     token = upload_sbom(SBOM_PATH, PROJECT_NAME, BASE_API_URL, API_KEY)
     dtrack_project = get_project(PROJECT_NAME, PROJECT_VERSION, BASE_API_URL, API_KEY)
-    get_project_vulnerabilities(BASE_API_URL, API_KEY)
-    get_project_components(BASE_API_URL, API_KEY)
-    get_project_direct_components(BASE_API_URL, API_KEY)
+    vulnerabilities = get_project_vulnerabilities(BASE_API_URL, API_KEY)
+    components = get_project_components(BASE_API_URL, API_KEY)
+    direct_components = get_project_direct_components(BASE_API_URL, API_KEY)
+    print('breakpoint')

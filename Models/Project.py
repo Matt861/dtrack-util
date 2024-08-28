@@ -1,3 +1,4 @@
+import json
 from typing import Optional, List
 
 
@@ -30,7 +31,7 @@ class Project:
         return self._components
 
     def get_direct_components(self) -> List[dict]:
-        return self._project_data.get('directDependencies')
+        return json.loads(self._project_data.get('directDependencies'))
 
     def set_vulnerabilities(self, vulnerabilities: list[dict]):
         self._vulnerabilities = vulnerabilities
